@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloom Filter Visualizer</title>
+  <!-- Tailwind CSS and Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass {
+      -webkit-backdrop-filter: blur(10px);
+      /* For Safari 9+ */
+      backdrop-filter: blur(10px);
+      /* Standard property */
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+    }
+
+    .input-field {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+      outline: none;
+    }
+
+    /* Style the <option> elements for a dark dropdown */
+    select.input-field option {
+      background-color: #1f2937;
+      /* Tailwind gray-800 */
+      color: #fff;
+      padding: 0.5rem 1rem;
+    }
+
+    select.input-field option:hover {
+      background-color: #374151;
+      /* Tailwind gray-700 */
+    }
+
+    .btn {
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Bit cell styling */
+    .bit-cell {
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid #374151;
+      text-align: center;
+      font-size: 0.75rem;
+    }
+
+    /* Table styling for visualization */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td,
+    th {
+      padding: 0.25rem;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Main container -->
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto">
+      <!-- HERO SECTION: Email Breach Check -->
+      <div class="text-center mb-12">
+        <h1
+          class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2">
+          Bloom Filter Visualizer
+        </h1>
+        <p class="text-lg text-blue-200 max-w-2xl mx-auto">
+          Space-efficient probabilistic data structure with zero false negatives
+        </p>
+      </div>
+
+      <!-- Email Breach Check (Hero) -->
+      <div class="glass p-6 mb-8">
+        <h3 class="text-2xl font-semibold mb-4 text-blue-300 text-center">
+          Check if an email appears in a data breach
+        </h3>
+        <p class="text-sm text-gray-300 mb-6 text-center">
+          Enter an email address to check if it might have been compromised.
+        </p>
+
+        <!-- Email input and dropdown -->
+        <div class="max-w-xl mx-auto">
+          <div class="mb-4">
+            <label for="emailInput" class="block text-sm font-medium text-gray-300 mb-1">
+              Email Address
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                <i class="fas fa-envelope text-gray-400"></i>
+              </span>
+              <input type="email" id="emailInput"
+                class="input-field block w-full pl-10 pr-3 py-3 bg-gray-800 text-white"
+                placeholder="johndoe@example.com" />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="emailDropdown" class="block text-sm font-medium text-gray-300 mb-1">Select an Email</label>
+            <select id="emailDropdown" class="appearance-none input-field block w-full bg-gray-800 text-white">
+              <!-- Options populated dynamically via JavaScript -->
+            </select>
+          </div>
+
+          <!-- Result message area -->
+          <div id="emailResult" class="mt-4 py-3 px-4 rounded-lg hidden bg-gray-800 text-center">
+            <!-- JavaScript will insert the text here -->
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex space-x-2 mt-4">
+            <button id="checkEmailBtn"
+              class="btn px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg flex-1">
+              <i class="fas fa-search mr-1"></i> Check Email
+            </button>
+            <button id="addEmailBtn"
+              class="btn px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg flex-1">
+              <i class="fas fa-plus mr-1"></i> Add Email
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloom Filter Visualization Section -->
+      <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto space-y-8">
+          <!-- Header -->
+          <div class="text-center">
+            <h1
+              class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2"
+            >
+             Dynamic Bloom Filter Visualizer
+            </h1>
+            <p class="text-lg text-blue-200">
+              A deep visualization of how Bloom filters are configured and updated.
+            </p>
+          </div>
+
+          <!-- Configuration Section -->
+          <div class="glass p-6">
+            <h2 class="text-xl font-bold mb-4">Initialize Bloom Filter</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1" for="expectedElements"
+                  >Expected Elements (n):</label
+                >
+                <input
+                  id="expectedElements"
+                  type="number"
+                  value="2"
+                  class="input-field block w-full pl-3 pr-3 py-2 bg-gray-800 text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1" for="falsePositiveRatio"
+                  >False Positive Ratio (p):</label
+                >
+                <input
+                  id="falsePositiveRatio"
+                  type="number"
+                  step="0.001"
+                  value="0.01"
+                  class="input-field block w-full pl-3 pr-3 py-2 bg-gray-800 text-white"
+                />
+              </div>
+              <button
+                id="initFilterBtn"
+                class="btn w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg"
+              >
+                Initialize Filter
+              </button>
+            </div>
+            <!-- Configuration details (calculated values) -->
+            <div id="configDetails" class="mt-4 text-sm"></div>
+          </div>
+
+          <!-- Insert Elements Section -->
+          <div class="glass p-6">
+            <h2 class="text-xl font-bold mb-4">Insert / Check Element</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <input
+                id="elementInput"
+                type="text"
+                placeholder="Enter element (e.g., email)"
+                class="input-field block w-full pl-3 pr-3 py-2 bg-gray-800 text-white"
+              />
+              <button
+                id="addElementBtn"
+                class="btn w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg"
+              >
+                <i class="fas fa-plus mr-1"></i> Add Element
+              </button>
+              <button
+                id="checkElementBtn"
+                class="btn w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-lg"
+              >
+                <i class="fas fa-search mr-1"></i> Check Element
+              </button>
+            </div>
+            <!-- Element hash details -->
+            <div id="elementDetails" class="mt-4 text-sm"></div>
+          </div>
+
+          <!-- Inserted Values List -->
+          <div class="glass p-6">
+            <h2 class="text-xl font-bold mb-4">Inserted Elements</h2>
+            <ul id="insertedValuesList" class="list-disc pl-5 text-sm"></ul>
+          </div>
+
+          <!-- Bit Matrix Visualization Section -->
+          <div class="glass p-6">
+            <h2 class="text-xl font-bold mb-4">
+              Dynamic Bloom Filter Bit Matrix Visualization
+            </h2>
+            <p class="text-sm mb-2">
+              Each row represents a static Bloom filter; columns represent bits. When a filter reaches the load factor, a new row is created.
+            </p>
+            <!-- Table container -->
+            <div class="overflow-auto" style="max-height: 300px;">
+              <table id="bitMatrixTable" class="border">
+                <thead>
+                  <tr>
+                    <th class="border-b">Filter #</th>
+                    <th class="border-b">Bit Array</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Rows will be created dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- How Bloom Filters Work Panel -->
+          <div class="glass p-6">
+            <h3 class="text-lg font-semibold mb-2 text-blue-300">
+              <i class="fas fa-question-circle mr-1"></i> How Bloom Filters Work
+            </h3>
+            <div class="text-sm text-gray-300">
+              <ol class="list-decimal pl-5 space-y-2">
+                <li>
+                  Element is passed through
+                  <strong class="text-blue-300">multiple hash functions</strong>
+                </li>
+                <li>Each hash function produces a position in the bit array</li>
+                <li>The bits at these positions are set to 1</li>
+                <li>
+                  To check membership, we verify if all bits for the element's hash
+                  positions are set to 1
+                </li>
+              </ol>
+              <div class="mt-4 text-yellow-300">
+                <i class="fas fa-lightbulb mr-1"></i>
+                <strong>Key Properties:</strong>
+                <ul class="list-disc pl-5 mt-1 text-gray-300">
+                  <li>Space efficient</li>
+                  <li>Fast O(k) lookups</li>
+                  <li>No false negatives</li>
+                  <li>Possible false positives</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include your JavaScript here -->
+  <script defer src="bloom.js"></script>
+</body>
+
+</html>
